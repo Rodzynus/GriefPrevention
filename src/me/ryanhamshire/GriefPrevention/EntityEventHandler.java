@@ -37,6 +37,7 @@ import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -47,6 +48,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -1110,6 +1112,18 @@ public class EntityEventHandler implements Listener
 		Player attacker = null;
 		Entity damageSource = event.getAttacker();
 		EntityType damageSourceType = null;
+		
+		//Boat protection can be disabled in config
+		if (event.getVehicle() instanceof Boat)
+		{
+			if (!instance.config_claims_protectBoats) return;
+		}
+		
+		//Minecart protection can be disabled in config
+		if (event.getVehicle() instanceof Minecart)
+		{
+			if (!instance.config_claims_protectMinecarts) return;
+		}
 
 		//if damage source is null or a creeper, don't allow the damage when the vehicle is in a land claim
 		if(damageSource != null)
