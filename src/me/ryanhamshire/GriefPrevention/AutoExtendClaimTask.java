@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Material;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Biome;
 
@@ -31,40 +32,75 @@ class AutoExtendClaimTask implements Runnable
         }
     }
 
-    @SuppressWarnings("deprecation")
     private int getLowestBuiltY()
     {
         int y = this.claim.getLesserBoundaryCorner().getBlockY();
         
         if(this.yTooSmall(y)) return y;
-        
-        for(ChunkSnapshot chunk : this.chunks)
+
+        try
         {
-            Biome biome = chunk.getBiome(0,  0);
-            ArrayList<Integer> playerBlockIDs = RestoreNatureProcessingTask.getPlayerBlocks(this.worldType, biome);
-            
-            boolean ychanged = true;
-            while(!this.yTooSmall(y) && ychanged)
+            for(ChunkSnapshot chunk : this.chunks)
             {
-                ychanged = false;
-                for(int x = 0; x < 16; x++)
+                Biome biome = chunk.getBiome(0,  0);
+                ArrayList<Material> playerBlockIDs = RestoreNatureProcessingTask.getPlayerBlocks(this.worldType, biome);
+
+                boolean ychanged = true;
+                while(!this.yTooSmall(y) && ychanged)
                 {
-                    for(int z = 0; z < 16; z++)
+                    ychanged = false;
+                    for(int x = 0; x < 16; x++)
                     {
-                        int blockType = chunk.getBlockTypeId(x, y, z);
-                        while(!this.yTooSmall(y) && playerBlockIDs.contains(blockType))
+                        for(int z = 0; z < 16; z++)
                         {
-                            ychanged = true;
-                            blockType = chunk.getBlockTypeId(x, --y, z);
+                            Material blockType = chunk.getBlockType(x, y, z);
+                            while(!this.yTooSmall(y) && playerBlockIDs.contains(blockType))
+                            {
+                                ychanged = true;
+                                blockType = chunk.getBlockType(x, --y, z);
+                            }
+
+                            if(this.yTooSmall(y)) return y;
                         }
-                        
-                        if(this.yTooSmall(y)) return y;
                     }
                 }
+
+                if(this.yTooSmall(y)) return y;
             }
-            
-            if(this.yTooSmall(y)) return y;
         }
+        catch (NoSuchMethodError e)
+        {
+            GriefPrevention.instance.getLogger().severe("You are running an outdated build of Craftbukkit/Spigot/Paper. Please update.");
+            for(ChunkSnapshot chunk : this.chunks)
+            {
+                Biome biome = chunk.getBiome(0,  0);
+                ArrayList<Material> playerBlockIDs = RestoreNatureProcessingTask.getPlayerBlocks(this.worldType, biome);
+
+                boolean ychanged = true;
+                while(!this.yTooSmall(y) && ychanged)
+                {
+                    ychanged = false;
+                    for(int x = 0; x < 16; x++)
+                    {
+                        for(int z = 0; z < 16; z++)
+                        {
+                            int blockType = chunk.getBlockTypeId(x, y, z);
+                            while(!this.yTooSmall(y) && playerBlockIDs.contains(Material.getMaterial(blockType)))
+                            {
+                                ychanged = true;
+                                blockType = chunk.getBlockTypeId(x, --y, z);
+                            }
+
+                            if(this.yTooSmall(y)) return y;
+                        }
+                    }
+                }
+
+                if(this.yTooSmall(y)) return y;
+            }
+
+        }
+
         
         return y;
     }
