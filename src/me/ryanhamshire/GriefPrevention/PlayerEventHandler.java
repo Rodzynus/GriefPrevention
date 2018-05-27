@@ -1691,7 +1691,12 @@ class PlayerEventHandler implements Listener
 		}
 		
 		//otherwise apply rules for buttons and switches
-		else if(clickedBlock != null && instance.config_claims_preventButtonsSwitches && (clickedBlockType == null || clickedBlockType == Material.STONE_BUTTON || clickedBlockType == Material.WOOD_BUTTON || clickedBlockType == Material.LEVER || instance.config_mods_accessTrustIds.Contains(new MaterialInfo(clickedBlock.getType(), clickedBlock.getData(), null))))
+		else if(clickedBlock != null && instance.config_claims_preventButtonsSwitches && (
+				clickedBlockType == null || 
+				clickedBlockType == Material.STONE_BUTTON || 
+				clickedBlockType == Material.WOOD_BUTTON || 
+				clickedBlockType == Material.LEVER || 
+				instance.config_mods_accessTrustIds.Contains(new MaterialInfo(clickedBlock.getType(), clickedBlock.getData(), null))))
 		{
 		    if(playerData == null) playerData = this.dataStore.getPlayerData(player.getUniqueId());
 		    Claim claim = this.dataStore.getClaimAt(clickedBlock.getLocation(), false, playerData.lastClaim);
@@ -1780,7 +1785,7 @@ class PlayerEventHandler implements Listener
 				return;
 			}
 			
-			else if(clickedBlock != null && (
+			else if(clickedBlock != null && instance.config_claims_protectBoats && (
 			        materialInHand == Material.BOAT || 
 			        materialInHand == Material.BOAT_ACACIA || 
 			        materialInHand == Material.BOAT_BIRCH || 
@@ -1803,10 +1808,10 @@ class PlayerEventHandler implements Listener
 				return;
 			}
 			
-			//survival world minecart placement requires container trust, which is the permission required to remove the minecart later
+			//survival world minecart placement requires container trust, which is the permission required to remove the minecart later or ProtectMinecarts option is set to false.
 			else if(clickedBlock != null &&
 			        (materialInHand == Material.MINECART || materialInHand == Material.POWERED_MINECART || materialInHand == Material.STORAGE_MINECART || materialInHand == Material.EXPLOSIVE_MINECART || materialInHand == Material.HOPPER_MINECART) &&
-			        !instance.creativeRulesApply(clickedBlock.getLocation()))
+			        !instance.creativeRulesApply(clickedBlock.getLocation()) && instance.config_claims_protectMinecarts)
             {
                 if(playerData == null) playerData = this.dataStore.getPlayerData(player.getUniqueId());
                 Claim claim = this.dataStore.getClaimAt(clickedBlock.getLocation(), false, playerData.lastClaim);
